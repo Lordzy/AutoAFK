@@ -7,18 +7,23 @@
 ______________________________________________________________________________*/
 
 
+
 #if defined _included_autoafk
  #endinput
 #endif
 
 #define _included_autoafk
 
-#include <a_samp>
+#tryinclude <a_samp>
+
+/*
+native bool:IsPlayerPaused(playerid);
+*/
 
 new L_pTicks[MAX_PLAYERS],
 	L_pAFK[MAX_PLAYERS],
 	L_pisSpawned[MAX_PLAYERS];
-	
+
 
 stock ExecuteLAFK()
 {
@@ -53,7 +58,11 @@ forward L_AFK_OnGM();
 public OnPlayerUpdate(playerid)
 {
  L_pTicks[playerid] = GetTickCount();
- if(L_pAFK[playerid] == 1) L_pAFK[playerid] = 0;
+ if(L_pAFK[playerid] == 1)
+ {
+  L_pAFK[playerid] = 0;
+  CallLocalFunction("OnPlayerResume", "i", playerid);
+ }
  CallLocalFunction("L_AFK_OPU", "i", playerid);
  return 1;
 }
@@ -134,8 +143,18 @@ public L_AFKDETECT()
    if(GetPlayerState(i) >= 1 && GetPlayerState(i) <= 3)
    {
 	L_pAFK[i] = 1;
+	CallLocalFunction("OnPlayerPause", "i", i);
    }
   }
  }
  return 1;
+}
+
+forward OnPlayerPause(playerid);
+forward OnPlayerResume(playerid);
+
+stock bool:IsPlayerPaused(playerid)
+{
+ if(L_pAFK[playerid] == 1) return true;
+ else return false;
 }
